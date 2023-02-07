@@ -35,29 +35,32 @@ public class ViewController {
     ArrayList<ImageView> pieceImageViews = new ArrayList<>();
     ArrayList<Piece> pieces = Pieces.getPieces();
 
-    public void initialize(){
+    public void initialize() {
         initGrid();
         initPieces();
+        highlightTurn();
         b1.setOnAction(e -> click(1));
         b1.setOnAction(e -> killPiece(pieces.get(5)));
         b2.setOnAction(e -> killPiece(pieces.get(6)));
     }
-    public void click(int id){
+
+    public void click(int id) {
         int[] position = new int[2];
         Random rnd = new Random();
         position[0] = rnd.nextInt(0, 8);
         position[1] = rnd.nextInt(0, 8);
         movePiece(pieces.get(id), position);
     }
-    private void initGrid(){
-        for(int i = 1; i < 9; i++){
-            for(int j = 1; j < 9; j++){
+
+    private void initGrid() {
+        for (int i = 1; i < 9; i++) {
+            for (int j = 1; j < 9; j++) {
                 StackPane newField = new StackPane();
                 grid.add(newField, j, i);
                 fields.add(newField);
             }
         }
-        for(int i = 0; i < fields.size(); i++){
+        for (int i = 0; i < fields.size(); i++) {
             //Backgrounds
             VBox background = new VBox();
             background.setMaxSize(72, 72);
@@ -70,20 +73,22 @@ public class ViewController {
             int index = i;
             button.setOnMouseEntered(e -> mouseOver(index, true));
             button.setOnMouseExited(e -> mouseOver(index, false));
+            button.setOnAction(e -> fieldClicked(index));
             fields.get(i).getChildren().add(button);
             buttons.add(button);
             mouseOver(index, false);
         }
     }
-    private void initPieces(){
+
+    private void initPieces() {
         Images pieceImages = new Images();
         Image[] images = pieceImages.getPNGs();
-        for(int i = 0; i < pieces.size(); i++){
+        for (int i = 0; i < pieces.size(); i++) {
             ImageView newPiece = new ImageView();
             newPiece.setFitHeight(65);
             newPiece.setFitWidth(65);
-            if(pieces.get(i).getColor()) { //Black
-                switch (pieces.get(i).getType()){
+            if (pieces.get(i).getColor()) { //Black
+                switch (pieces.get(i).getType()) {
                     case "Pawn":
                         newPiece.setImage(images[6]);
                         break;
@@ -104,8 +109,8 @@ public class ViewController {
                         newPiece.setImage(images[11]);
                         break;
                 }
-            }else{ //White
-                switch (pieces.get(i).getType()){
+            } else { //White
+                switch (pieces.get(i).getType()) {
                     case "Pawn":
                         newPiece.setImage(images[0]);
                         break;
@@ -130,81 +135,161 @@ public class ViewController {
             pieceImageViews.add(newPiece);
         }
     }
-    private int xyToIndex(int[] position){
-        return position[0] + position[1]*8;
+
+    private int xyToIndex(int[] position) {
+        return position[0] + position[1] * 8;
     }
-    public void movePiece(Piece piece, int[] moveTo){
+
+    private int[] indexToXY(int index) {
+        int[] pos = new int[2];
+        int y = 0;
+        while (index >= 8) {
+            index -= 8;
+            y++;
+        }
+        int x = index;
+        pos[0] = x;
+        pos[1] = y;
+        return pos;
+    }
+
+    public void movePiece(Piece piece, int[] moveTo) {
         int currentPos = xyToIndex(piece.getPosition());
         int toPos = xyToIndex(moveTo);
-        piece.setPosition(moveTo);
-        for(int i = 0; i < pieces.size(); i++){
-            if(pieces.get(i) == piece){
+        for (int i = 0; i < pieces.size(); i++) {
+            if (pieces.get(i) == piece) {
                 fields.get(currentPos).getChildren().remove(pieceImageViews.get(i));
                 fields.get(toPos).getChildren().add(1, pieceImageViews.get(i));
             }
         }
     }
-    public void killPiece(Piece piece){
+
+    public void killPiece(Piece piece) {
         int currentPos = xyToIndex(piece.getPosition());
-        for(int i = 0; i < pieces.size(); i++){
-            if(pieces.get(i) == piece){
+        for (int i = 0; i < pieces.size(); i++) {
+            if (pieces.get(i) == piece) {
                 fields.get(currentPos).getChildren().remove(pieceImageViews.get(i));
-                if(piece.getColor()){//Black
+                if (piece.getColor()) {//Black
                     dead2.getChildren().add(pieceImageViews.get(i));
-                }
-                else { //White
+                } else { //White
                     dead1.getChildren().add(pieceImageViews.get(i));
                 }
             }
         }
     }
-    private void mouseOver(int index, boolean isOver){
-        Node node = backgrounds.get(index);
-        if(LogicController.get().isHighlighted(index)){ //Highlight
-            if(Math.floor(index/8)%2 == 0) {
-                if(index%2 == 0){
-                    if(isOver) node.setStyle(node.getStyle() + "; -fx-background-color: #ffe866");
-                    else node.setStyle(node.getStyle() + "; -fx-background-color: #fff18e");
-                }
-                else{
-                    if(isOver) node.setStyle(node.getStyle() + "; -fx-background-color: #ffde08");
-                    else node.setStyle(node.getStyle() + "; -fx-background-color: #ffe262");
-                }
-            }
-            else {
-                if(index%2 == 1){
-                    if(isOver) node.setStyle(node.getStyle() + "; -fx-background-color: #ffe866");
-                    else node.setStyle(node.getStyle() + "; -fx-background-color: #fff18e");
-                }
-                else{
-                    if(isOver) node.setStyle(node.getStyle() + "; -fx-background-color: #ffde08");
-                    else node.setStyle(node.getStyle() + "; -fx-background-color: #ffe262");
-                }
-            }
-        }
-        else{ //Normal grey/White
-            if(Math.floor(index/8)%2 == 0) {
-                if(index%2 == 0){
-                    if(isOver) node.setStyle(node.getStyle() + "; -fx-background-color: #dddddd");
-                    else node.setStyle(node.getStyle() + "; -fx-background-color: #eeeeee");
-                }
-                else{
-                    if(isOver) node.setStyle(node.getStyle() + "; -fx-background-color: #bbbbbb");
-                    else node.setStyle(node.getStyle() + "; -fx-background-color: #cccccc");
-                }
-            }
-            else {
-                if(index%2 == 1){
-                    if(isOver) node.setStyle(node.getStyle() + "; -fx-background-color: #dddddd");
-                    else node.setStyle(node.getStyle() + "; -fx-background-color: #eeeeee");
-                }
-                else{
-                    if(isOver) node.setStyle(node.getStyle() + "; -fx-background-color: #bbbbbb");
-                    else node.setStyle(node.getStyle() + "; -fx-background-color: #cccccc");
-                }
-            }
+
+    public void winner(boolean color) {
+
+    }
+
+    public void updateBoard() {
+        for (int i = 0; i < fields.size(); i++) {
+            mouseOver(i, false);
         }
     }
+
+    public void fieldClicked(int index) {
+        Piece piece = Pieces.getInstance().getPieceAt(indexToXY(index));
+        LogicController.get().choosePiece(piece);
+        updateBoard();
+    }
+
+    private void mouseOver(int index, boolean isOver) {
+        Node node = backgrounds.get(index);
+        Piece piece = Pieces.getInstance().getPieceAt(indexToXY(index));
+
+        if (LogicController.get().isHighlighted(index)) { //Highlight
+            if (Math.floor(index / 8) % 2 == 0) {
+                if (index % 2 == 0) {
+                    if (isOver) node.setStyle(node.getStyle() + "; -fx-background-color: #ead5aa");
+                    else node.setStyle(node.getStyle() + "; -fx-background-color: #fffad6");
+                } else {
+                    if (isOver) node.setStyle(node.getStyle() + "; -fx-background-color: #ffec9e");
+                    else node.setStyle(node.getStyle() + "; -fx-background-color: #ffe9b8");
+                }
+            } else {
+                if (index % 2 == 1) {
+                    if (isOver) node.setStyle(node.getStyle() + "; -fx-background-color: #ead5aa");
+                    else node.setStyle(node.getStyle() + "; -fx-background-color: #fffad6");
+                } else {
+                    if (isOver) node.setStyle(node.getStyle() + "; -fx-background-color: #ffec9e");
+                    else node.setStyle(node.getStyle() + "; -fx-background-color: #ffe9b8");
+                }
+            }
+        } else { //Normal grey/White
+            if (Math.floor(index / 8) % 2 == 0) {
+                if (index % 2 == 0) {
+                    if (isOver) node.setStyle(node.getStyle() + "; -fx-background-color: #dddddd");
+                    else node.setStyle(node.getStyle() + "; -fx-background-color: #eeeeee");
+                } else {
+                    if (isOver) node.setStyle(node.getStyle() + "; -fx-background-color: #bbbbbb");
+                    else node.setStyle(node.getStyle() + "; -fx-background-color: #cccccc");
+                }
+            } else {
+                if (index % 2 == 1) {
+                    if (isOver) node.setStyle(node.getStyle() + "; -fx-background-color: #dddddd");
+                    else node.setStyle(node.getStyle() + "; -fx-background-color: #eeeeee");
+                } else {
+                    if (isOver) node.setStyle(node.getStyle() + "; -fx-background-color: #bbbbbb");
+                    else node.setStyle(node.getStyle() + "; -fx-background-color: #cccccc");
+                }
+            }
+        }
+
+        if (!piece.getType().equals("Empty")) {
+            if (piece.getChosen()) { //Choose with green
+                if (Math.floor(index / 8) % 2 == 0) {
+                    if (index % 2 == 0) {
+                        if (isOver) node.setStyle(node.getStyle() + "; -fx-background-color: #bcffa1");
+                        else node.setStyle(node.getStyle() + "; -fx-background-color: #c9ffb3");
+                    } else {
+                        if (isOver) node.setStyle(node.getStyle() + "; -fx-background-color: #8fff62");
+                        else node.setStyle(node.getStyle() + "; -fx-background-color: #a8ff84");
+                    }
+                } else {
+                    if (index % 2 == 1) {
+                        if (isOver) node.setStyle(node.getStyle() + "; -fx-background-color: #bcffa1");
+                        else node.setStyle(node.getStyle() + "; -fx-background-color: #c9ffb3");
+                    } else {
+                        if (isOver) node.setStyle(node.getStyle() + "; -fx-background-color: #8fff62");
+                        else node.setStyle(node.getStyle() + "; -fx-background-color: #a8ff84");
+                    }
+                }
+            } else if (piece.getMarked()) { //Mark with Red
+                if (Math.floor(index / 8) % 2 == 0) {
+                    if (index % 2 == 0) {
+                        if (isOver) node.setStyle(node.getStyle() + "; -fx-background-color: #ff6969");
+                        else node.setStyle(node.getStyle() + "; -fx-background-color: #ff9595");
+                    } else {
+                        if (isOver) node.setStyle(node.getStyle() + "; -fx-background-color: #ff1a1a");
+                        else node.setStyle(node.getStyle() + "; -fx-background-color: #ff5c5c");
+                    }
+                } else {
+                    if (index % 2 == 1) {
+                        if (isOver) node.setStyle(node.getStyle() + "; -fx-background-color: #ff6969");
+                        else node.setStyle(node.getStyle() + "; -fx-background-color: #ff9595");
+                    } else {
+                        if (isOver) node.setStyle(node.getStyle() + "; -fx-background-color: #ff1a1a");
+                        else node.setStyle(node.getStyle() + "; -fx-background-color: #ff5c5c");
+                    }
+                }
+            }
+        }
+
+
+    }
+
+    public void highlightTurn() {
+        boolean turn = Pieces.getInstance().isTurn();
+        if (turn) {
+            dead1.setStyle(dead1.getStyle() + "; -fx-border-color: #aaaaaa; -fx-background-color: #eeeeee");
+            dead2.setStyle(dead1.getStyle() + "; -fx-border-color: #52bb19; -fx-background-color: #c3e7c7");
+        } else {
+            dead1.setStyle(dead1.getStyle() + "; -fx-border-color: #52bb19; -fx-background-color: #c3e7c7");
+            dead2.setStyle(dead1.getStyle() + "; -fx-border-color: #aaaaaa; -fx-background-color: #eeeeee");
+        }
+    }
+}
 
     /*
      public void moveCar(int player, int amount){
@@ -270,4 +355,3 @@ public class ViewController {
         });
     }
      */
-}

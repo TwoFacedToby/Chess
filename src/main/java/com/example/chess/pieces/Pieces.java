@@ -6,6 +6,14 @@ public class Pieces {
 
     private static ArrayList<Piece> pieces;
 
+    private static Pieces pieceInstance;
+    private boolean turn = false;
+
+    public static Pieces getInstance(){
+        if(pieceInstance == null) pieceInstance = new Pieces();
+        return pieceInstance;
+    }
+
     public static ArrayList<Piece> getPieces(){
         if(pieces == null) initPieces();
         return pieces;
@@ -47,5 +55,24 @@ public class Pieces {
         pieces.add(new Piece("Pawn", true, 5, 1)); //Black Pawn
         pieces.add(new Piece("Pawn", true, 6, 1)); //Black Pawn
         pieces.add(new Piece("Pawn", true, 7, 1)); //Black Pawn
+    }
+
+    public Piece getPieceAt(int[] position){
+        for(int i = 0; i < pieces.size(); i++){
+            if(pieces.get(i).getPosition()[0] == position[0]){
+                if(pieces.get(i).getPosition()[1] == position[1]) {
+                    return pieces.get(i);
+                }
+            }
+        }
+        Piece piece = new Piece("Empty", false, position[0], position[1]);
+        return piece;
+    }
+
+    public boolean isTurn() {
+        return turn;
+    }
+    public void setTurn(boolean turn){
+        this.turn = turn;
     }
 }

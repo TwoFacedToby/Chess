@@ -6,12 +6,16 @@ public class Piece {
     private int x;
     private int y;
     private boolean alive;
+    private boolean chosen;
+    private boolean marked;
 
     public Piece(String type, boolean color, int x, int y){
         this.type = type;
         this.color = color;
         this.x = x;
         this.y = y;
+        chosen = false;
+        marked = false;
     }
 
     public String getType(){
@@ -31,6 +35,14 @@ public class Piece {
     }
     public void setAlive(boolean alive){
         this.alive = alive;
+    }
+    public void setChosen(boolean chosen){ this.chosen = chosen;}
+    public boolean getChosen(){
+        return chosen;
+    }
+    public void setMarked(boolean marked){ this.marked = marked;}
+    public boolean getMarked(){
+        return marked;
     }
     public int[] getPosition(){
         int[] pos = new int[2];

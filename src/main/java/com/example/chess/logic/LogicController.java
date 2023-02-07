@@ -16,7 +16,9 @@ public class LogicController extends HighlightLogic{
     public void setController(ViewController viewController){
         this.viewController = viewController;
     }
-
+    public ViewController getViewController(){
+        return viewController;
+    }
 
 
 }
